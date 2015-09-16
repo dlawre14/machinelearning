@@ -42,5 +42,11 @@ class DecisionTree:
 
     #Takes a list of all tweets by a user and tokenizes them
     #modes: whitespace, nort, noat, nortnoat
-    def tokenizetweets(tweets, mode='whitespace'):
+    def tokenizetweets(self, tweets, mode='whitespace'):
         tokens = {}
+        for entry in tweets:
+            tok = entry.split()
+            for t in tok:
+                tokens[t] = tokens.get(t, 0) + 1
+
+        return tokens
