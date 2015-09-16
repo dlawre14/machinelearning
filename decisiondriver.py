@@ -17,10 +17,12 @@ with open('ctweets', 'rb') as c, open('utweets', 'rb') as u, open('mtweets', 'rb
     utweets = pickle.load(u)
     mtweets = pickle.load(m)
 
-uxx00tokens = tree.tokenizetweets(utweets['xx00'])
-sorted_uxx00tokens = sorted(uxx00tokens.items(), key=operator.itemgetter(1))
+utokens = {}
+for key in utweets:
+    tokens = tree.tokenizetweets(utweets[key])
+    for t in tokens:
+        utokens[t] = utokens.get(t, 0) + tokens[t]
 
-print ('---')
-print (sorted_uxx00tokens)
-print ('---')
-print (len(uxx00tokens.keys()))
+sorted_utokens = sorted(utokens.items(), key=operator.itemgetter(1))
+
+print (sorted_utokens)

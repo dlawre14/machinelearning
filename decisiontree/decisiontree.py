@@ -45,8 +45,17 @@ class DecisionTree:
     def tokenizetweets(self, tweets, mode='whitespace'):
         tokens = {}
         for entry in tweets:
+            if mode == 'nort' or mode == 'nortnoat': #remove retweets
+                entry = entry.lstrip('RT ')
+
             tok = entry.split()
             for t in tok:
-                tokens[t] = tokens.get(t, 0) + 1
+                if mode == 'noat' or mode == 'nortnoat':
+                    if '@' in t:
+                        pass
+                    else:
+                        tokens[t] = tokens.get(t, 0) + 1
+                else:
+                    tokens[t] = tokens.get(t, 0) + 1
 
         return tokens
