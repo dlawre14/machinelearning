@@ -52,6 +52,16 @@ for key in mtweets:
       testm.append(t)
 
 #create dictionaries of tokens
-utokens = tree.tokenizetweets(trainingu)
-ctokens = tree.tokenizetweets(trainingc)
-mtokens = tree.tokenizetweets(trainingm)
+utokens = tree.tokenizetweets(trainingu).items()
+ctokens = tree.tokenizetweets(trainingc).items()
+mtokens = tree.tokenizetweets(trainingm).items()
+
+utokens = sorted(utokens, key=operator.itemgetter(1), reverse=True)
+ctokens = sorted(ctokens, key=operator.itemgetter(1), reverse=True)
+mtokens = sorted(mtokens, key=operator.itemgetter(1), reverse=True)
+
+print ('Top words from index 30:41 in dialect: ')
+print ('------------------------')
+print ('u: ' + str(utokens[30:41]))
+print ('c: ' + str(ctokens[30:41]))
+print ('m: ' + str(mtokens[30:41]))
