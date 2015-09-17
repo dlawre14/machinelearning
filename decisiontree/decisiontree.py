@@ -59,3 +59,11 @@ class DecisionTree:
                     tokens[t] = tokens.get(t, 0) + 1
 
         return tokens
+
+    #takes a list of tokens and frequenices (in list(tuple)) and throws away
+    #selected tuples the user doesn't want
+    def tokencleaner(self, tokens, **kwargs):
+        for i in range(len(tokens)):
+            if kwargs.get('nourl', False):
+                if ('http://' in tokens[i][0]):
+                    tokens[i] = '@@@@@@@@@@@@@@@@'
