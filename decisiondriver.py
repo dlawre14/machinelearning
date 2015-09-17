@@ -60,8 +60,30 @@ utokens = sorted(utokens, key=operator.itemgetter(1), reverse=True)
 ctokens = sorted(ctokens, key=operator.itemgetter(1), reverse=True)
 mtokens = sorted(mtokens, key=operator.itemgetter(1), reverse=True)
 
-print ('Top words from index 30:41 in dialect: ')
-print ('------------------------')
-print ('u: ' + str(utokens[30:41]))
-print ('c: ' + str(ctokens[30:41]))
-print ('m: ' + str(mtokens[30:41]))
+#throw out all but the top 100 entries
+utokens = utokens[0:100]
+ctokens = ctokens[0:100]
+mtokens = mtokens[0:100]
+
+#gather all words
+uwords = []
+cwords = []
+mwords = []
+
+for t in utokens:
+  uwords.append(t[0])
+for t in ctokens:
+  cwords.append(t[0])
+for t in mwords:
+  mwords.append(t[0])
+
+#remove similar words
+ucwords = list(set(uwords) | set(cwords))
+umwords = list(set(uwords) | set(mwords))
+cmwords = list(set(cwords) | set(mwords))
+
+print (uwords)
+print ('----')
+print (cwords)
+print ('----')
+print (ucwords)
