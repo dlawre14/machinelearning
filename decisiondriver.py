@@ -2,6 +2,7 @@
 
 import pickle
 import operator
+import random
 
 from utility.entropy import entropy
 from decisiontree.decisiontree import DecisionTree
@@ -17,33 +18,40 @@ with open('ctweets', 'rb') as c, open('utweets', 'rb') as u, open('mtweets', 'rb
     utweets = pickle.load(u)
     mtweets = pickle.load(m)
 
-#TODO: Stripe tweets for testing
+#Stripe tweets for testing
+trainingc = []
+testc = []
 
-utokens = {}
+trainingu = []
+testu = []
+
+trainingm = []
+testm = []
+
+random.seed(123412)
 for key in utweets:
-    tokens = tree.tokenizetweets(utweets[key])
-    for t in tokens:
-        utokens[t] = utokens.get(t, 0) + tokens[t]
-
-ctokens = {}
+  tweets = utweets[key]
+  for t in tweets:
+    if random.randrange(1,101) <= 90:
+      trainingu.append(t)
+    else:
+      testu.append(t)
 for key in ctweets:
-    tokens = tree.tokenizetweets(ctweets[key])
-    for t in tokens:
-        ctokens[t] = ctokens.get(t,0) + tokens[t]
-
-mtokens = {}
+  tweets = ctweets[key]
+  for t in tweets:
+    if random.randrange(1,101) <= 90:
+      trainingc.append(t)
+    else:
+      testc.append(t)
 for key in mtweets:
-    tokens = tree.tokenizetweets(mtweets[key])
-    for t in tokens:
-        mtokens[t] = mtokens.get(t,0) + tokens[t]
+  tweets = mtweets[key]
+  for t in tweets:
+    if random.randrange(1,101) <= 90:
+      trainingm.append(t)
+    else:
+      testm.append(t)
 
-
-sorted_utokens = sorted(utokens.items(), key=operator.itemgetter(1))
-sorted_ctokens = sorted(ctokens.items(), key=operator.itemgetter(1))
-sorted_mtokens = sorted(mtokens.items(), key=operator.itemgetter(1))
-
-tree.tokencleaner(sorted_utokens, nourl = True)
-
-print ('---')
-print (sorted_utokens)
-print ('---')
+#create dictionaries of tokens
+utokens = tree.tokenizetweets(trainingu)
+ctokens = tree.tokenizetweets(trainingc)
+mtokens = tree.tokenizetweets(trainingm)
