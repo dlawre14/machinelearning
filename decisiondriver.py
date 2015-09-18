@@ -60,10 +60,10 @@ utokens = sorted(utokens, key=operator.itemgetter(1), reverse=True)
 ctokens = sorted(ctokens, key=operator.itemgetter(1), reverse=True)
 mtokens = sorted(mtokens, key=operator.itemgetter(1), reverse=True)
 
-#throw out all but the top 100 entries
-utokens = utokens[0:100]
-ctokens = ctokens[0:100]
-mtokens = mtokens[0:100]
+#try middle set of words
+utokens = utokens[100:201]
+ctokens = ctokens[100:201]
+mtokens = mtokens[0:100] #not enough tokens for 100:200
 
 #gather all words
 uwords = []
@@ -77,13 +77,60 @@ for t in ctokens:
 for t in mwords:
   mwords.append(t[0])
 
-#remove similar words
-ucwords = list(set(uwords) | set(cwords))
-umwords = list(set(uwords) | set(mwords))
-cmwords = list(set(cwords) | set(mwords))
+#remove duplciates
+uc = list(set(uwords) & set(cwords))
+um = list(set(uwords) & set(mwords))
+cm = list(set(uwords) & set(mwords))
 
-print (uwords)
-print ('----')
-print (cwords)
-print ('----')
-print (ucwords)
+for word in uc:
+  uwords.remove(word)
+  cwords.remove(word)
+for word in um:
+  uwords.remove(word)
+  mwords.remove(word)
+for word in cm:
+  cwords.remove(word)
+  mwords.remove(word)
+
+for i in range(len(utokens)):
+  if utokens[i][0] not in uwords:
+    utokens[i] = 'DELETE'
+
+for i in range(len(ctokens)):
+  if ctokens[i][0] not in cwords:
+    ctokens[i] = 'DELETE'
+
+for i in range(len(mtokens)):
+  if mtokens[i][0] not in mwords:
+    mtokens[i] = 'DELETE'
+
+utokens = [x for x in utokens if x != 'DELETE']
+ctokens = [x for x in ctokens if x != 'DELETE']
+mtokens = [x for x in mtokens if x != 'DELETE']
+
+wordtotal = 0
+
+for x,y in utokens:
+  wordtotal += y
+for x,y in ctokens:
+  wordtotal += y
+for x,y in mtokens:
+  wordtotal += y
+
+for i in range(len(utokens)):
+  utokens[i] = (utokens[i][0], utokens[i][1]/wordtotal)
+for i in range(len(ctokens)):
+  ctokens[i] = (ctokens[i][0], ctokens[i][1]/wordtotal)
+for i in range(len(mtokens)):
+  mtokens[i] = (mtokens[i][0], mtokens[i][1]/wordtotal)
+
+tree.buildTree(entropy, None, utokens, ctokens, mtokens)
+
+node = tree.root
+while node != None:
+    if node.word == 'ENDFLAG':
+        print ('Reached end, classifying as m')
+        node = None
+    else:
+        print ('Curr word: ' + node.word + ' classify as ' + node.yes)
+        node = node.no

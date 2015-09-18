@@ -2,10 +2,18 @@
 import os
 import pickle
 
+class Node:
+
+  def __init__(self, parent = None, word = None):
+    self.parent = parent
+    self.word = word
+    self.yes = None #could be a node or an outcome
+    self.no = None
+
 class DecisionTree:
 
     def __init__(self):
-        pass
+        self.root = Node()
 
     #Note: only needs to be done once
     def read_data(self, udir, mdir, cdir, **kwargs):
@@ -45,6 +53,7 @@ class DecisionTree:
     def tokenizetweets(self, tweets, mode='whitespace'):
         tokens = {}
         for entry in tweets:
+            entry = entry.lower()
             if mode == 'nort' or mode == 'nortnoat': #remove retweets
                 entry = entry.lstrip('RT ')
 
@@ -67,3 +76,57 @@ class DecisionTree:
             if kwargs.get('nourl', False):
                 if ('http://' in tokens[i][0]):
                     tokens[i] = '@@@@@@@@@@@@@@@@'
+
+    def buildTree(self, entFunction, currNode, utokens, ctokens, mtokens):
+      if len(utokens) == len(ctokens) == len(mtokens) == 0:
+          currNode.word = 'ENDFLAG'
+          currNode.yes = currNode.no = 'm'
+          return
+      if currNode == None:
+        currNode = self.root
+      #entropies of the words, dictionary of word : entropy
+      centr = {}
+      uentr = {}
+      mentr = {}
+
+      for x,y in utokens:
+        uentr[x] = entFunction([y, 1-y])
+      for x,y in ctokens:
+        centr[x] = entFunction([y, 1-y])
+      for x,y in mtokens:
+        mentr[x] = entFunction([y, 1-y])
+
+      maxent = 0
+      maxword = None
+      tag = None
+
+      for word in centr:
+        if centr[word] > maxent:
+          maxent = centr[word]
+          maxword = word
+          tag = 'c'
+      for word in uentr:
+        if uentr[word] > maxent:
+          maxent = uentr[word]
+          maxword = word
+          tag = 'u'
+      for word in mentr:
+        if mentr[word] > maxent:
+          maxent = mentr[word]
+          maxword = word
+          tag = 'm'
+
+      currNode.word = maxword
+      currNode.yes = tag
+      currNode.no = Node(currNode)
+
+      utokens = [x for x in utokens if x[0] != maxword]
+      ctokens = [x for x in ctokens if x[0] != maxword]
+      mtokens = [x for x in mtokens if x[0] != maxword]
+
+      print (str(len(utokens)) + '--' + str(len(ctokens)) + '--' + str(len(mtokens)))
+
+      return self.buildTree(entFunction, currNode.no, utokens, ctokens, mtokens)
+
+    def classify(self, tweet):
+        pass
