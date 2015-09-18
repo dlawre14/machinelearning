@@ -140,10 +140,13 @@ class DecisionTree:
         tweet = tweet.lower().split()
         currNode = self.root
         while type(currNode) is Node:
+            #print ('Checking if ' + currNode.word + ' is in tweet...')
             if currNode.word in tweet:
+                #print ('Word found, returning classification...')
                 #print ('Found word ' + currNode.word + ' in tweet classifying as: ' + currNode.yes)
                 return currNode.yes
             else:
+                #print ('Word not found, recursing...')
                 currNode = currNode.no
         #at end
         #print ('Found no word match, classifying as: m')

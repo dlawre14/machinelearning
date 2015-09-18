@@ -7,6 +7,10 @@ import random
 from utility.entropy import entropy
 from decisiontree.decisiontree import DecisionTree
 
+import sys
+
+#sys.setrecursionlimit(1500) #might be dangerous
+
 tree = DecisionTree()
 
 ctweets = None
@@ -60,10 +64,10 @@ utokens = sorted(utokens, key=operator.itemgetter(1), reverse=True)
 ctokens = sorted(ctokens, key=operator.itemgetter(1), reverse=True)
 mtokens = sorted(mtokens, key=operator.itemgetter(1), reverse=True)
 
-#try middle set of words
-utokens = utokens[0:500]
-ctokens = ctokens[0:500]
-mtokens = mtokens[0:500] #not enough tokens for 100:200
+#strip out twitter handles
+utokens = [x for x in utokens if '@' not in x[0]][0:300]
+ctokens = [x for x in ctokens if '@' not in x[0]][0:300]
+mtokens = [x for x in mtokens if '@' not in x[0]][0:300]
 
 #gather all words
 uwords = []
@@ -125,28 +129,30 @@ for i in range(len(mtokens)):
   mtokens[i] = (mtokens[i][0], mtokens[i][1]/wordtotal)
 
 tree.buildTree(entropy, None, utokens, ctokens, mtokens)
-tree.printtree()
 
-correct = 0
+total=0
+score=0
 for tweet in testu:
     if tree.classify(tweet) == 'u':
-        correct +=1
+        score += 1
+    total+=1
 
-print ('Testing u dialect')
-print ('Total: ' + str(len(testu)) + ' Correct: ' + str(correct))
+print ('u score: ' + str(score/total))
 
-correct = 0
+total=0
+score=0
 for tweet in testc:
     if tree.classify(tweet) == 'c':
-        correct +=1
+        score += 1
+    total+=1
 
-print ('Testing c dialect')
-print ('Total: ' + str(len(testc)) + ' Correct: ' + str(correct))
+print ('c score: ' + str(score/total))
 
-correct = 0
+total=0
+score=0
 for tweet in testm:
     if tree.classify(tweet) == 'm':
-        correct +=1
+        score += 1
+    total+=1
 
-print ('Testing m dialect')
-print ('Total: ' + str(len(testm)) + ' Correct: ' + str(correct))
+print ('m score: ' + str(score/total))
