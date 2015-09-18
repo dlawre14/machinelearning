@@ -61,9 +61,9 @@ ctokens = sorted(ctokens, key=operator.itemgetter(1), reverse=True)
 mtokens = sorted(mtokens, key=operator.itemgetter(1), reverse=True)
 
 #try middle set of words
-utokens = utokens[100:201]
-ctokens = ctokens[100:201]
-mtokens = mtokens[0:100] #not enough tokens for 100:200
+utokens = utokens[0:500]
+ctokens = ctokens[0:500]
+mtokens = mtokens[0:500] #not enough tokens for 100:200
 
 #gather all words
 uwords = []
@@ -125,12 +125,11 @@ for i in range(len(mtokens)):
   mtokens[i] = (mtokens[i][0], mtokens[i][1]/wordtotal)
 
 tree.buildTree(entropy, None, utokens, ctokens, mtokens)
+tree.printtree()
 
-node = tree.root
-while node != None:
-    if node.word == 'ENDFLAG':
-        print ('Reached end, classifying as m')
-        node = None
-    else:
-        print ('Curr word: ' + node.word + ' classify as ' + node.yes)
-        node = node.no
+correct = 0
+for tweet in testu:
+    if tree.classify(tweet) == 'u':
+        correct +=1
+
+print ('Total: ' + str(len(testu)) + ' Correct: ' + str(correct))

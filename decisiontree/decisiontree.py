@@ -124,9 +124,27 @@ class DecisionTree:
       ctokens = [x for x in ctokens if x[0] != maxword]
       mtokens = [x for x in mtokens if x[0] != maxword]
 
-      print (str(len(utokens)) + '--' + str(len(ctokens)) + '--' + str(len(mtokens)))
+      #print (str(len(utokens)) + '--' + str(len(ctokens)) + '--' + str(len(mtokens)))
 
       return self.buildTree(entFunction, currNode.no, utokens, ctokens, mtokens)
 
+    def printtree(self, currNode=None):
+        if currNode == None: currNode=self.root
+        if type(currNode.no) is str:
+            print (currNode.word + ' -> yes: ' + currNode.yes + ' -> no: ' + currNode.no)
+        else:
+            print (currNode.word + ' -> yes: ' + currNode.yes)
+            return self.printtree(currNode.no)
+
     def classify(self, tweet):
-        pass
+        tweet = tweet.lower().split()
+        currNode = self.root
+        while type(currNode) is Node:
+            if currNode.word in tweet:
+                #print ('Found word ' + currNode.word + ' in tweet classifying as: ' + currNode.yes)
+                return currNode.yes
+            else:
+                currNode = currNode.no
+        #at end
+        #print ('Found no word match, classifying as: m')
+        return currNode
