@@ -132,4 +132,21 @@ for tweet in testu:
     if tree.classify(tweet) == 'u':
         correct +=1
 
+print ('Testing u dialect')
 print ('Total: ' + str(len(testu)) + ' Correct: ' + str(correct))
+
+correct = 0
+for tweet in testc:
+    if tree.classify(tweet) == 'c':
+        correct +=1
+
+print ('Testing c dialect')
+print ('Total: ' + str(len(testc)) + ' Correct: ' + str(correct))
+
+correct = 0
+for tweet in testm:
+    if tree.classify(tweet) == 'm':
+        correct +=1
+
+print ('Testing m dialect')
+print ('Total: ' + str(len(testm)) + ' Correct: ' + str(correct))
