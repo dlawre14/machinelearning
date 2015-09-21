@@ -4,9 +4,9 @@ import pickle
 
 class Node:
 
-  def __init__(self, parent = None, word = None):
+  def __init__(self, parent = None):
     self.parent = parent
-    self.word = word
+    self.word = None
     self.yes = None #could be a node or an outcome
     self.no = None
 
@@ -77,64 +77,28 @@ class DecisionTree:
                 if ('http://' in tokens[i][0]):
                     tokens[i] = '@@@@@@@@@@@@@@@@'
 
-    def buildTree(self, entFunction, currNode, utokens, ctokens, mtokens):
-      if len(utokens) == len(ctokens) == len(mtokens) == 0:
-          currNode.word = 'ENDFLAG'
-          currNode.yes = currNode.no = 'm'
+    def buildTree(self, currNode, tokens):
+      #TODO: build tree list is in the form [(word, class, entropy)]
+      #should be sorted
+
+      #doing this with a loop to fix recursion problem
+
+      for tup in tokens:
+        if tokens.index(tup) == len(tokens) - 1:
+          currNode.parent.no = tup[1]
+          print ('We are out of words')
           return
-      if currNode == None:
-        currNode = self.root
-      #entropies of the words, dictionary of word : entropy
-      centr = {}
-      uentr = {}
-      mentr = {}
 
-      for x,y in utokens:
-        uentr[x] = entFunction([y, 1-y])
-      for x,y in ctokens:
-        centr[x] = entFunction([y, 1-y])
-      for x,y in mtokens:
-        mentr[x] = entFunction([y, 1-y])
+        currNode.yes = tup[1]
+        currNode.no = Node(currNode)
+        currNode.word = tup[0]
 
-      maxent = 0
-      maxword = None
-      tag = None
-
-      for word in centr:
-        if centr[word] > maxent:
-          maxent = centr[word]
-          maxword = word
-          tag = 'c'
-      for word in uentr:
-        if uentr[word] > maxent:
-          maxent = uentr[word]
-          maxword = word
-          tag = 'u'
-      for word in mentr:
-        if mentr[word] > maxent:
-          maxent = mentr[word]
-          maxword = word
-          tag = 'm'
-
-      currNode.word = maxword
-      currNode.yes = tag
-      currNode.no = Node(currNode)
-
-      utokens = [x for x in utokens if x[0] != maxword]
-      ctokens = [x for x in ctokens if x[0] != maxword]
-      mtokens = [x for x in mtokens if x[0] != maxword]
-
-      #print (str(len(utokens)) + '--' + str(len(ctokens)) + '--' + str(len(mtokens)))
-
-      return self.buildTree(entFunction, currNode.no, utokens, ctokens, mtokens)
+        currNode = currNode.no
 
     def printtree(self, currNode=None):
-        if currNode == None: currNode=self.root
-        if type(currNode.no) is str:
-            print (currNode.word + ' -> yes: ' + currNode.yes + ' -> no: ' + currNode.no)
-        else:
-            print (currNode.word + ' -> yes: ' + currNode.yes)
-            return self.printtree(currNode.no)
+        while type(currNode) != str:
+          print (currNode.word + ' yes -> ' + currNode.yes)
+          currNode = currNode.no
 
     def classify(self, tweet):
         tweet = tweet.lower().split()

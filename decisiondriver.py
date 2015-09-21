@@ -9,7 +9,7 @@ from decisiontree.decisiontree import DecisionTree
 
 import sys
 
-#sys.setrecursionlimit(1500) #might be dangerous
+sys.setrecursionlimit(3500) #might be dangerous
 
 tree = DecisionTree()
 
@@ -56,103 +56,54 @@ for key in mtweets:
       testm.append(t)
 
 #create dictionaries of tokens
-utokens = tree.tokenizetweets(trainingu).items()
-ctokens = tree.tokenizetweets(trainingc).items()
-mtokens = tree.tokenizetweets(trainingm).items()
+utokens = tree.tokenizetweets(trainingu)
+ctokens = tree.tokenizetweets(trainingc)
+mtokens = tree.tokenizetweets(trainingm)
 
-utokens = sorted(utokens, key=operator.itemgetter(1), reverse=True)
-ctokens = sorted(ctokens, key=operator.itemgetter(1), reverse=True)
-mtokens = sorted(mtokens, key=operator.itemgetter(1), reverse=True)
+keyset = set()
 
-#strip out twitter handles
-utokens = [x for x in utokens if '@' not in x[0]][0:300]
-ctokens = [x for x in ctokens if '@' not in x[0]][0:300]
-mtokens = [x for x in mtokens if '@' not in x[0]][0:300]
+for key in utokens:
+  keyset.add(key)
+for key in ctokens:
+  keyset.add(key)
+for key in mtokens:
+  keyset.add(key)
 
-#gather all words
-uwords = []
-cwords = []
-mwords = []
+entkeyvals = []
+for key in keyset:
+  ucount = utokens.get(key, 0)
+  ccount = ctokens.get(key, 0)
+  mcount = mtokens.get(key, 0)
 
-for t in utokens:
-  uwords.append(t[0])
-for t in ctokens:
-  cwords.append(t[0])
-for t in mwords:
-  mwords.append(t[0])
+  #classify as max
+  classify = ''
+  if ucount >= ccount and ucount >= mcount:
+    classify = 'u'
+  if ccount >= ucount and ccount >= mcount:
+    classify = 'c'
+  if mcount >= ucount and mcount >= ccount:
+    classify = 'm'
 
-#remove duplciates
-uc = list(set(uwords) & set(cwords))
-um = list(set(uwords) & set(mwords))
-cm = list(set(uwords) & set(mwords))
+  total = ucount + ccount + mcount
 
-for word in uc:
-  uwords.remove(word)
-  cwords.remove(word)
-for word in um:
-  uwords.remove(word)
-  mwords.remove(word)
-for word in cm:
-  cwords.remove(word)
-  mwords.remove(word)
+  #calculate probabilities
+  ucount = ucount/total
+  ccount = ccount/total
+  mcount = mcount/total
 
-for i in range(len(utokens)):
-  if utokens[i][0] not in uwords:
-    utokens[i] = 'DELETE'
+  ent = entropy([ucount, ccount, mcount])
 
-for i in range(len(ctokens)):
-  if ctokens[i][0] not in cwords:
-    ctokens[i] = 'DELETE'
+  entkeyvals.append((key, classify, ent))
 
-for i in range(len(mtokens)):
-  if mtokens[i][0] not in mwords:
-    mtokens[i] = 'DELETE'
+entkeyvals = [x for x in entkeyvals if x[2] > 0]
+entkeyvals = sorted(entkeyvals, key=operator.itemgetter(2))
+entkeyvals.reverse()
 
-utokens = [x for x in utokens if x != 'DELETE']
-ctokens = [x for x in ctokens if x != 'DELETE']
-mtokens = [x for x in mtokens if x != 'DELETE']
+tree.buildTree(tree.root, entkeyvals)
 
-wordtotal = 0
-
-for x,y in utokens:
-  wordtotal += y
-for x,y in ctokens:
-  wordtotal += y
-for x,y in mtokens:
-  wordtotal += y
-
-for i in range(len(utokens)):
-  utokens[i] = (utokens[i][0], utokens[i][1]/wordtotal)
-for i in range(len(ctokens)):
-  ctokens[i] = (ctokens[i][0], ctokens[i][1]/wordtotal)
-for i in range(len(mtokens)):
-  mtokens[i] = (mtokens[i][0], mtokens[i][1]/wordtotal)
-
-tree.buildTree(entropy, None, utokens, ctokens, mtokens)
-
-total=0
-score=0
+correct = 0
 for tweet in testu:
-    if tree.classify(tweet) == 'u':
-        score += 1
-    total+=1
+  if tree.classify(tweet) == 'u':
+    correct += 1
 
-print ('u score: ' + str(score/total))
-
-total=0
-score=0
-for tweet in testc:
-    if tree.classify(tweet) == 'c':
-        score += 1
-    total+=1
-
-print ('c score: ' + str(score/total))
-
-total=0
-score=0
-for tweet in testm:
-    if tree.classify(tweet) == 'm':
-        score += 1
-    total+=1
-
-print ('m score: ' + str(score/total))
+print ('Total u: ' + str(len(testu)) + ' Correct: ' + str(correct))

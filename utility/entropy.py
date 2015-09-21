@@ -4,6 +4,7 @@ from math import log
 def entropy(args):
     value = 0
     for x in args:
+      if x > 0:
         value += -(x * log(x, 2))
     return value
 
