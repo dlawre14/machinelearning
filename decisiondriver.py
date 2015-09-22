@@ -46,17 +46,17 @@ for key in trainingu:
   tweets = tree.tokenizetweets(utweets[key])
   tweets = [x for x in tweets]
   for tweet in tweets:
-    words.add(tweet)
+    if len(tweet) > 2 and len(tweet) < 8 and 'http' not in tweet and '#' not in tweet: words.add(tweet)
 for key in trainingc:
   tweets = tree.tokenizetweets(ctweets[key])
   tweets = [x for x in tweets]
   for tweet in tweets:
-    words.add(tweet)
+    if len(tweet) > 2 and len(tweet) < 8 and 'http' not in tweet and '#' not in tweet: words.add(tweet)
 for key in trainingm:
   tweets = tree.tokenizetweets(mtweets[key])
   tweets = [x for x in tweets]
   for tweet in tweets:
-    words.add(tweet)
+    if len(tweet) > 2 and len(tweet) < 8 and 'http' not in tweet and '#' not in tweet: words.add(tweet)
 
 print (len(words))
 

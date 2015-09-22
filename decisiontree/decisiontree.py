@@ -58,6 +58,8 @@ class DecisionTree:
                 entry = entry.lstrip('RT ')
 
             tok = entry.split()
+            for i in range(len(tok)):
+              tok[i] = tok[i].rstrip(',?.!:;')
             for t in tok:
                 if mode == 'noat' or mode == 'nortnoat':
                     if '@' in t:
