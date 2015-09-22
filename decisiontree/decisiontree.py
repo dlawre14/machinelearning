@@ -96,7 +96,7 @@ class DecisionTree:
 
     def printtree(self, currNode=None):
         while type(currNode) != str:
-          #print (currNode.word + ' yes -> ' + currNode.yes)
+          print (currNode.word + ' yes -> ' + currNode.yes)
           currNode = currNode.no
 
     def classify(self, tweet):

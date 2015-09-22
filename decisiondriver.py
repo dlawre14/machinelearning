@@ -23,119 +23,120 @@ with open('ctweets', 'rb') as c, open('utweets', 'rb') as u, open('mtweets', 'rb
     mtweets = pickle.load(m)
 
 #Stripe tweets for testing
-usersc = []
-for key in ctweets:
-    usersc.append(key)
+trainingu = [] #keys for training
+trainingc = []
+trainingm = []
 
-trainingc = usersc[0:17]
-testc = usersc[17:19]
+testu = ['xx00','xx01']
+testc = ['xx00','xx01']
+testm = ['xx00','xx01']
 
-trainingc = [ctweets[x] for x in trainingc]
-testc = [ctweets[x] for x in testc]
-
-temp = []
-for entry in trainingc:
-    temp += entry
-trainingc = list(temp)
-temp = []
-for entry in testc:
-    temp += entry
-testc = list(temp)
-##
-usersu = []
 for key in utweets:
-    usersu.append(key)
-
-trainingu = usersu[0:21]
-testu = usersu[21:24]
-
-trainingu = [utweets[x] for x in trainingu]
-testu = [utweets[x] for x in testu]
-
-temp = []
-for entry in trainingu:
-    temp += entry
-trainingu = list(temp)
-temp = []
-for entry in testu:
-    temp += entry
-testu = list(temp)
-##
-usersm = []
+  if key != 'xx00' and key != 'xx01':
+    trainingu.append(key)
+for key in ctweets:
+  if key != 'xx00' and key != 'xx01':
+    trainingc.append(key)
 for key in mtweets:
-    usersm.append(key)
+  if key != 'xx00' and key != 'xx01':
+    trainingm.append(key)
 
-trainingm = usersm[0:5]
-testm = usersm[5:7]
+words = set()
+for key in trainingu:
+  tweets = tree.tokenizetweets(utweets[key])
+  tweets = [x for x in tweets]
+  for tweet in tweets:
+    words.add(tweet)
+for key in trainingc:
+  tweets = tree.tokenizetweets(ctweets[key])
+  tweets = [x for x in tweets]
+  for tweet in tweets:
+    words.add(tweet)
+for key in trainingm:
+  tweets = tree.tokenizetweets(mtweets[key])
+  tweets = [x for x in tweets]
+  for tweet in tweets:
+    words.add(tweet)
 
-trainingm = [mtweets[x] for x in trainingm]
-testm = [mtweets[x] for x in testm]
-
-temp = []
-for entry in trainingm:
-    temp += entry
-trainingm = list(temp)
-temp = []
-for entry in testm:
-    temp += entry
-testm = list(temp)
-
-#create dictionaries of tokens
-utokens = tree.tokenizetweets(trainingu)
-ctokens = tree.tokenizetweets(trainingc)
-mtokens = tree.tokenizetweets(trainingm)
-
-utokens = {x:y for x,y in utokens.items() if utokens[x] > 2}
-ctokens = {x:y for x,y in ctokens.items() if ctokens[x] > 2}
-mtokens = {x:y for x,y in mtokens.items() if mtokens[x] > 2}
-
-allkeys = set()
-for key in utokens:
-  allkeys.add(key)
-for key in ctokens:
-  allkeys.add(key)
-for key in mtokens:
-  allkeys.add(key)
+print (len(words))
 
 entkeyvals = []
-#total = len(allkeys)
-for key in allkeys:
-  total = utokens.get(key,0) + ctokens.get(key,0) + mtokens.get(key,0)
+for word in words:
+  ccount = 0
+  for key in trainingc:
+    for tweet in ctweets[key]:
+        if word in tweet.lower():
+          ccount +=1
+  ucount = 0
+  for key in trainingu:
+    for tweet in utweets[key]:
+        if word in tweet.lower():
+          ucount +=1
+  mcount = 0
+  for key in trainingm:
+    for tweet in mtweets[key]:
+        if word in tweet.lower():
+          mcount +=1
+  total = ccount + ucount + mcount
+  if total > 0:
+    ccount = ccount/total
+    ucount = ucount/total
+    mcount = mcount/total
 
-  uprob = utokens.get(key,0)/total
-  cprob = ctokens.get(key,0)/total
-  mprob = mtokens.get(key,0)/total
+    #print ('Calculating entropy for word: ' + word)
 
-  classify = 'u'
-  if cprob >= uprob and cprob >= mprob:
-    classify = 'c'
-  elif uprob >= cprob and uprob >= mprob:
-    classify = 'u'
-  else:
-    classify = 'm'
+    ent = entropy([ccount,ucount,mcount])
 
-  ent = entropy([uprob,cprob,mprob])
-  if len(key) > 1:
-    entkeyvals.append((key, classify, ent))
+    if ccount >= ucount and ccount >= mcount:
+      entkeyvals.append((word,'c',ent))
+    elif ucount >= ccount and ucount >= mcount:
+      entkeyvals.append((word,'u',ent))
+    else:
+      entkeyvals.append((word,'m',ent))
 
 entkeyvals = sorted(entkeyvals, key=operator.itemgetter(2))
 entkeyvals.reverse()
 
 tree.buildTree(tree.root, entkeyvals)
 
-mcount = 0
 ccount = 0
-ucount = 0
+uccount = 0
+mcount = 0
+for tweet in ctweets['xx00']:
+  classify = tree.classify(tweet)
+  if classify == 'c':
+    ccount += 1
+  elif classify == 'u':
+    ucount += 1
+  else:
+    mcount += 1
+print ('Classified ctweets')
+print ('u: ' + str(ucount) + ' c: ' + str(ccount) + ' m: ' + str(mcount))
 
-for tweet in testm:
-    out = tree.classify(tweet)
-    if out == 'm':
-        mcount+=1
-    if out == 'c':
-        ccount+=1
-    if out == 'u':
-        ucount+=1
+ccount = 0
+uccount = 0
+mcount = 0
+for tweet in utweets['xx00']:
+  classify = tree.classify(tweet)
+  if classify == 'c':
+    ccount += 1
+  elif classify == 'u':
+    ucount += 1
+  else:
+    mcount += 1
+print ('Classified utweets')
+print ('u: ' + str(ucount) + ' c: ' + str(ccount) + ' m: ' + str(mcount))
 
-print ('c classify: ' + str(ccount))
-print ('u classify: ' + str(ucount))
-print ('m classify: ' + str(mcount))
+ccount = 0
+uccount = 0
+mcount = 0
+for tweet in mtweets['xx00']:
+  classify = tree.classify(tweet)
+  if classify == 'c':
+    ccount += 1
+  elif classify == 'u':
+    ucount += 1
+  else:
+    mcount += 1
+print ('Classified mtweets')
+print ('u: ' + str(ucount) + ' c: ' + str(ccount) + ' m: ' + str(mcount))
