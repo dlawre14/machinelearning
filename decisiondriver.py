@@ -8,6 +8,7 @@ from utility.entropy import entropy
 from decisiontree.decisiontree import DecisionTree
 
 import sys
+import os
 
 #sys.setrecursionlimit(3500) #might be dangerous
 
@@ -27,18 +28,11 @@ trainingu = [] #keys for training
 trainingc = []
 trainingm = []
 
-testu = ['xx00','xx01']
-testc = ['xx00','xx01']
-testm = ['xx00','xx01']
-
 for key in utweets:
-  if key != 'xx00' and key != 'xx01':
     trainingu.append(key)
 for key in ctweets:
-  if key != 'xx00' and key != 'xx01':
     trainingc.append(key)
 for key in mtweets:
-  if key != 'xx00' and key != 'xx01':
     trainingm.append(key)
 
 words = set()
@@ -99,44 +93,18 @@ entkeyvals.reverse()
 
 tree.buildTree(tree.root, entkeyvals)
 
-ccount = 0
-uccount = 0
-mcount = 0
-for tweet in ctweets['xx00']:
-  classify = tree.classify(tweet)
-  if classify == 'c':
-    ccount += 1
-  elif classify == 'u':
-    ucount += 1
-  else:
-    mcount += 1
-print ('Classified ctweets')
-print ('u: ' + str(ucount) + ' c: ' + str(ccount) + ' m: ' + str(mcount))
-
-ccount = 0
-uccount = 0
-mcount = 0
-for tweet in utweets['xx00']:
-  classify = tree.classify(tweet)
-  if classify == 'c':
-    ccount += 1
-  elif classify == 'u':
-    ucount += 1
-  else:
-    mcount += 1
-print ('Classified utweets')
-print ('u: ' + str(ucount) + ' c: ' + str(ccount) + ' m: ' + str(mcount))
-
-ccount = 0
-uccount = 0
-mcount = 0
-for tweet in mtweets['xx00']:
-  classify = tree.classify(tweet)
-  if classify == 'c':
-    ccount += 1
-  elif classify == 'u':
-    ucount += 1
-  else:
-    mcount += 1
-print ('Classified mtweets')
-print ('u: ' + str(ucount) + ' c: ' + str(ccount) + ' m: ' + str(mcount))
+for user in os.listdir('decisiontree/dialects/test'):
+  print (user)
+  with open('decisiontree/dialects/test/' + user, 'r') as f:
+    c = 0
+    u = 0
+    m = 0
+    for line in f:
+      classify = tree.classify(line)
+      if classify == 'c':
+        c+=1
+      elif classify == 'u':
+        u+=1
+      else:
+        m+=1
+    print (user + ' -- ' + 'c: ' + str(c) + ' u: ' + str(u) + ' m: ' + str(m))
