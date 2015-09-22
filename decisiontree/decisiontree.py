@@ -86,7 +86,6 @@ class DecisionTree:
       for tup in tokens:
         if tokens.index(tup) == len(tokens) - 1:
           currNode.parent.no = tup[1]
-          print ('We are out of words')
           return
 
         currNode.yes = tup[1]
@@ -97,11 +96,12 @@ class DecisionTree:
 
     def printtree(self, currNode=None):
         while type(currNode) != str:
-          print (currNode.word + ' yes -> ' + currNode.yes)
+          #print (currNode.word + ' yes -> ' + currNode.yes)
           currNode = currNode.no
 
     def classify(self, tweet):
-        tweet = tweet.lower().split()
+        #print ('Checking tweet: ' + tweet)
+        tweet=tweet.lower()
         currNode = self.root
         while type(currNode) is Node:
             #print ('Checking if ' + currNode.word + ' is in tweet...')
@@ -113,5 +113,5 @@ class DecisionTree:
                 #print ('Word not found, recursing...')
                 currNode = currNode.no
         #at end
-        #print ('Found no word match, classifying as: m')
+        #print ('Found no word match, classifying as: ' + currNode)
         return currNode

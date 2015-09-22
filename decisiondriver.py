@@ -9,7 +9,7 @@ from decisiontree.decisiontree import DecisionTree
 
 import sys
 
-sys.setrecursionlimit(3500) #might be dangerous
+#sys.setrecursionlimit(3500) #might be dangerous
 
 tree = DecisionTree()
 
@@ -23,87 +23,119 @@ with open('ctweets', 'rb') as c, open('utweets', 'rb') as u, open('mtweets', 'rb
     mtweets = pickle.load(m)
 
 #Stripe tweets for testing
-trainingc = []
-testc = []
-
-trainingu = []
-testu = []
-
-trainingm = []
-testm = []
-
-random.seed(123412)
-for key in utweets:
-  tweets = utweets[key]
-  for t in tweets:
-    if random.randrange(1,101) <= 90:
-      trainingu.append(t)
-    else:
-      testu.append(t)
+usersc = []
 for key in ctweets:
-  tweets = ctweets[key]
-  for t in tweets:
-    if random.randrange(1,101) <= 90:
-      trainingc.append(t)
-    else:
-      testc.append(t)
+    usersc.append(key)
+
+trainingc = usersc[0:17]
+testc = usersc[17:19]
+
+trainingc = [ctweets[x] for x in trainingc]
+testc = [ctweets[x] for x in testc]
+
+temp = []
+for entry in trainingc:
+    temp += entry
+trainingc = list(temp)
+temp = []
+for entry in testc:
+    temp += entry
+testc = list(temp)
+##
+usersu = []
+for key in utweets:
+    usersu.append(key)
+
+trainingu = usersu[0:21]
+testu = usersu[21:24]
+
+trainingu = [utweets[x] for x in trainingu]
+testu = [utweets[x] for x in testu]
+
+temp = []
+for entry in trainingu:
+    temp += entry
+trainingu = list(temp)
+temp = []
+for entry in testu:
+    temp += entry
+testu = list(temp)
+##
+usersm = []
 for key in mtweets:
-  tweets = mtweets[key]
-  for t in tweets:
-    if random.randrange(1,101) <= 90:
-      trainingm.append(t)
-    else:
-      testm.append(t)
+    usersm.append(key)
+
+trainingm = usersm[0:5]
+testm = usersm[5:7]
+
+trainingm = [mtweets[x] for x in trainingm]
+testm = [mtweets[x] for x in testm]
+
+temp = []
+for entry in trainingm:
+    temp += entry
+trainingm = list(temp)
+temp = []
+for entry in testm:
+    temp += entry
+testm = list(temp)
 
 #create dictionaries of tokens
 utokens = tree.tokenizetweets(trainingu)
 ctokens = tree.tokenizetweets(trainingc)
 mtokens = tree.tokenizetweets(trainingm)
 
-keyset = set()
+utokens = {x:y for x,y in utokens.items() if utokens[x] > 2}
+ctokens = {x:y for x,y in ctokens.items() if ctokens[x] > 2}
+mtokens = {x:y for x,y in mtokens.items() if mtokens[x] > 2}
 
+allkeys = set()
 for key in utokens:
-  keyset.add(key)
+  allkeys.add(key)
 for key in ctokens:
-  keyset.add(key)
+  allkeys.add(key)
 for key in mtokens:
-  keyset.add(key)
+  allkeys.add(key)
 
 entkeyvals = []
-for key in keyset:
-  ucount = utokens.get(key, 0)
-  ccount = ctokens.get(key, 0)
-  mcount = mtokens.get(key, 0)
+#total = len(allkeys)
+for key in allkeys:
+  total = utokens.get(key,0) + ctokens.get(key,0) + mtokens.get(key,0)
 
-  #classify as max
-  classify = ''
-  if ucount >= ccount and ucount >= mcount:
-    classify = 'u'
-  if ccount >= ucount and ccount >= mcount:
+  uprob = utokens.get(key,0)/total
+  cprob = ctokens.get(key,0)/total
+  mprob = mtokens.get(key,0)/total
+
+  classify = 'u'
+  if cprob >= uprob and cprob >= mprob:
     classify = 'c'
-  if mcount >= ucount and mcount >= ccount:
+  elif uprob >= cprob and uprob >= mprob:
+    classify = 'u'
+  else:
     classify = 'm'
 
-  total = ucount + ccount + mcount
+  ent = entropy([uprob,cprob,mprob])
+  if len(key) > 1:
+    entkeyvals.append((key, classify, ent))
 
-  #calculate probabilities
-  ucount = ucount/total
-  ccount = ccount/total
-  mcount = mcount/total
-
-  ent = entropy([ucount, ccount, mcount])
-
-  entkeyvals.append((key, classify, ent))
-
-entkeyvals = [x for x in entkeyvals if x[2] > 0]
 entkeyvals = sorted(entkeyvals, key=operator.itemgetter(2))
 entkeyvals.reverse()
 
 tree.buildTree(tree.root, entkeyvals)
 
-correct = 0
-for tweet in testu:
-  if tree.classify(tweet) == 'u':
-    correct += 1
+mcount = 0
+ccount = 0
+ucount = 0
 
-print ('Total u: ' + str(len(testu)) + ' Correct: ' + str(correct))
+for tweet in testm:
+    out = tree.classify(tweet)
+    if out == 'm':
+        mcount+=1
+    if out == 'c':
+        ccount+=1
+    if out == 'u':
+        ucount+=1
+
+print ('c classify: ' + str(ccount))
+print ('u classify: ' + str(ucount))
+print ('m classify: ' + str(mcount))
