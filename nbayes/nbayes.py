@@ -10,13 +10,22 @@
 #then set this equal to P(user|dialect) fromt here we can solve for P(dialect|user)
 #then just select maximum dialect
 
+from math import log
+
 class nbayes:
 
     def __init__(self):
         pass
 
-    def train(self):
-        pass
-
-    def classify(sef, tweet):
-        pass
+    def classify(self, tweets, cwordprob, uwordprob, mwordprob, tokenize):
+        cprob = 1
+        uprob = 1
+        mprob = 1
+        print ('<---------->')
+        for tweet in tweets:
+            for word in tokenize(tweet):
+                print ('prob of ' + word + ' in c is ' + str(cwordprob(word)))
+                cprob *= log(cwordprob(word))
+                uprob *= log(uwordprob(word))
+                mprob *= log(mwordprob(word))
+        return (cprob, uprob, mprob)

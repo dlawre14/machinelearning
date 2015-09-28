@@ -1,8 +1,12 @@
 #main entry for naive bayes of irish tweets
 import os
 
+from math import log
+
 from utility.prob import probability
 from utility.tokenize import tokenize
+
+from nbayes.nbayes import nbayes
 
 utweets = {}
 ctweets = {}
@@ -75,9 +79,49 @@ for key in mtweets:
     mtweets[key] = occur
 
 allwords = set()
+sumcwords = 0
+sumuwords = 0
+summwords = 0
 
 for key in ctweets:
     for word in ctweets[key]:
+        sumcwords += ctweets[key][word]
+        allwords.add(word)
+for key in utweets:
+    for word in utweets[key]:
+        sumuwords += utweets[key][word]
+        allwords.add(word)
+for key in mtweets:
+    for word in mtweets[key]:
+        summwords += mtweets[key][word]
         allwords.add(word)
 
-print (allwords)
+#probability of a word given the dialect
+wordprobc = probability()
+wordprobu = probability()
+wordprobm = probability()
+
+for word in allwords:
+    count = 0
+    for user in ctweets:
+        count += ctweets[user].get(word, 0)
+    #print ('Count of ' + word + ' in c is ' + str(count))
+    wordprobc.addProb(word, count/sumcwords)
+
+    count = 0
+    for user in utweets:
+        count += utweets[user].get(word, 0)
+    #print ('Count of ' + word + ' in u is ' + str(count))
+    wordprobu.addProb(word, count/sumuwords)
+
+    count = 0
+    for user in mtweets:
+        count += mtweets[user].get(word, 0)
+    #print ('Count of ' + word + ' in m is ' + str(count))
+    wordprobm.addProb(word, count/summwords)
+
+nb = nbayes()
+with open('nbayes/dialects/test/xx00', 'r') as f:
+    lines = f.readlines()
+    lines = [x.rstrip('\n') for x in lines]
+    print (nb.classify(lines, wordprobc, wordprobu, wordprobm, tokenize))
