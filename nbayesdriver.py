@@ -106,22 +106,31 @@ for word in allwords:
     for user in ctweets:
         count += ctweets[user].get(word, 0)
     #print ('Count of ' + word + ' in c is ' + str(count))
-    wordprobc.addProb(word, count/sumcwords)
+    if count/sumcwords > 0.001:
+        wordprobc.addProb(word, count/sumcwords)
 
     count = 0
     for user in utweets:
         count += utweets[user].get(word, 0)
     #print ('Count of ' + word + ' in u is ' + str(count))
-    wordprobu.addProb(word, count/sumuwords)
+    if count/sumuwords > 0.001:
+        wordprobu.addProb(word, count/sumuwords)
 
     count = 0
     for user in mtweets:
         count += mtweets[user].get(word, 0)
     #print ('Count of ' + word + ' in m is ' + str(count))
-    wordprobm.addProb(word, count/summwords)
+    if count/summwords > 0.001:
+        wordprobm.addProb(word, count/summwords)
 
 nb = nbayes()
-with open('nbayes/dialects/test/xx00', 'r') as f:
-    lines = f.readlines()
-    lines = [x.rstrip('\n') for x in lines]
-    print (nb.classify(lines, wordprobc, wordprobu, wordprobm, tokenize))
+print ('c\tu\tm')
+for user in os.listdir('nbayes/dialects/test'):
+    with open('nbayes/dialects/test/'+user, 'r') as f:
+        lines = f.readlines()
+        lines = [x.rstrip('\n') for x in lines]
+        classtup = nb.classify(lines, wordprobc, wordprobu, wordprobm, tokenize)
+        classtup = (classtup[0]+log(dialectprob('c')), classtup[1]+log(dialectprob('u')), classtup[2]+log(dialectprob('m')))
+        classify = ''
+        index = classtup.index(max(classtup))
+        print (user + str(classtup) + ' max: ' + str(index))

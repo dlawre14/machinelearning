@@ -18,14 +18,14 @@ class nbayes:
         pass
 
     def classify(self, tweets, cwordprob, uwordprob, mwordprob, tokenize):
-        cprob = 1
-        uprob = 1
-        mprob = 1
-        print ('<---------->')
+        cprob = 0
+        uprob = 0
+        mprob = 0
+        #print ('<---------->')
         for tweet in tweets:
             for word in tokenize(tweet):
-                print ('prob of ' + word + ' in c is ' + str(cwordprob(word)))
-                cprob *= log(cwordprob(word))
-                uprob *= log(uwordprob(word))
-                mprob *= log(mwordprob(word))
+                #print ('curr c prob ' + str(cprob))
+                cprob += log(cwordprob(word))
+                uprob += log(uwordprob(word))
+                mprob += log(mwordprob(word))
         return (cprob, uprob, mprob)
