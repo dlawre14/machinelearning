@@ -1,5 +1,6 @@
 #main entry for naive bayes of irish tweets
 import os
+import re
 
 from math import log
 
@@ -124,7 +125,7 @@ for word in allwords:
         wordprobm.addProb(word, count/summwords)
 
 nb = nbayes()
-print ('c\tu\tm')
+print ('\tc-dia\t\t\tu-dia\t\t\tm-dia')
 for user in os.listdir('nbayes/dialects/test'):
     with open('nbayes/dialects/test/'+user, 'r') as f:
         lines = f.readlines()
@@ -132,5 +133,8 @@ for user in os.listdir('nbayes/dialects/test'):
         classtup = nb.classify(lines, wordprobc, wordprobu, wordprobm, tokenize)
         classtup = (classtup[0]+log(dialectprob('c')), classtup[1]+log(dialectprob('u')), classtup[2]+log(dialectprob('m')))
         classify = ''
-        index = classtup.index(max(classtup))
-        print (user + str(classtup) + ' max: ' + str(index))
+        index =' max: ' + str(classtup.index(max(classtup)))
+        index = re.sub('max: 0', 'class: c', index)
+        index = re.sub('max: 1', 'class: u', index)
+        index = re.sub('max: 2', 'class: m', index)
+        print (user + str(classtup) + index)
