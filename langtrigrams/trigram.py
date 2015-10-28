@@ -34,6 +34,28 @@ def distLang(l1, l2):
 
     return dist
 
+def mergeFiles(f1name, f2name):
+    f1tri = readInTrigrams('trigrams/'+f1name)
+    f2tri = readInTrigrams('trigrams/'+f2name)
+
+    keys = set()
+
+    for key in f1tri:
+        keys.add(key)
+    for key in f2tri:
+        keys.add(key)
+
+    mergetri = {}
+
+    for key in keys:
+        mergetri[key] = f1tri.get(key,0) + f2tri.get(key,0)
+
+    with open('trigrams/'+f1name.rstrip('.txt')+'_'+f2name.rstrip('.txt')+'.txt', 'w') as f:
+        for key in mergetri:
+            f.write(str(mergetri[key]) + ' ' + key + '\n')
+
+    return
+
+
 if __name__ == '__main__':
-    for files in os.listdir():
-        
+    #TODO: Write
