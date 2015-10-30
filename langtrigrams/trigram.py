@@ -58,4 +58,4 @@ def mergeFiles(f1name, f2name):
 
 
 if __name__ == '__main__':
-    #TODO: Write
+    #TODO: Write code to find min distance, merge, repeat
