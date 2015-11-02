@@ -1,2 +1,8 @@
 decisiontree/dialects
 langtrigrams/trigrams
+langtrigrams/graphviz
+langtrigrams/old
+
+*.gv
+*.p
+*.pdf

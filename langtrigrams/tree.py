@@ -1,5 +1,7 @@
 import pickle
 
+from graphviz import Digraph
+
 class node:
 
   def __init__(self, val):
@@ -71,10 +73,39 @@ if __name__ == '__main__':
 
   while len(jobs) != 0:
     curr = jobs.pop()
-    print (curr)
     for n in nodes:
       if n.parent and n.parent.val == curr.val:
         curr.addchild(treenode(n.val, curr))
         jobs.append(curr.getchildren()[len(curr.getchildren())-1])
 
-  #TODO: somehow visualize the tree
+  #do full trace
+
+  graphlist = {}
+  nodeid = {}
+
+  locals = [root]
+  i = 0
+  while len(locals) != 0:
+    curr = locals.pop()
+    #print ('curr: ' + str(curr) + ' parent: ' + str(curr.parent))
+    locals += list(curr.getchildren())
+
+    graphlist[i] = curr
+    nodeid[curr] = i
+    i+=1
+
+  dot = Digraph(comment='lang phylo tree')
+
+  #Note: tree contains 199 nodes
+  i -= 1
+  for j in range(i):
+    print (graphlist[j].val)
+    dot.node(str(j), graphlist[j].val)
+
+  for nd in nodeid:
+    children = nd.getchildren()
+    if len(children) == 2:
+      dot.edge(str(nodeid[nd]), str(nodeid[children[0]]))
+      dot.edge(str(nodeid[nd]), str(nodeid[children[1]]))
+
+  dot.render('tree.gv', view=True)
