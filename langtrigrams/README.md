@@ -1,3 +1,6 @@
 # trigrams
 
-Lorem Ipsum
+TODO List
+* Create better smoothing methods
+* Implement neighbor joining
+

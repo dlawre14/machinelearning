@@ -7,6 +7,8 @@ import itertools
 import time
 import pickle
 
+from math import log
+
 def readInTrigrams(filename, probconv=True):
     '''
     Reads a language trigram file and returns a dictionary of trigram:count
@@ -42,6 +44,24 @@ def distLang(l1, l2):
         dist += abs(l1.get(key,0) - l2.get(key,0))
 
     return dist
+
+def KLdist(l1,l2):
+  dist = 0
+  keys = set()
+
+  for key in l1:
+      keys.add(key)
+  for key in l2:
+      keys.add(key)
+
+  for key in keys:
+      #can probably smooth better
+      if l1.get(key,0) == 0 or l2.get(key,0) == 0:
+          pass
+      else:
+          dist += (l1.get(key,0) * log (l1.get(key,0) / l2.get(key, 0)))
+
+  return dist
 
 def mergeFiles(f1name, f2name, outname):
     f1tri = readInTrigrams('trigrams/'+f1name, False)
@@ -79,7 +99,7 @@ if __name__ == '__main__':
         for pairs in itertools.combinations(langs, 2):
             l1 = readInTrigrams('trigrams/'+pairs[0])
             l2 = readInTrigrams('trigrams/'+pairs[1])
-            dist = distLang(l1,l2)
+            dist = KLdist(l1,l2)
             if dist < mindist:
                 mindist = dist
                 minpair = (pairs[0], pairs[1])

@@ -108,4 +108,4 @@ if __name__ == '__main__':
       dot.edge(str(nodeid[nd]), str(nodeid[children[0]]))
       dot.edge(str(nodeid[nd]), str(nodeid[children[1]]))
 
-  dot.render('tree.gv', view=True)
+  dot.render('treeKL.gv', view=True)
